@@ -1,9 +1,11 @@
 package silver.bars
 
 import silver.bars.domain.Direction
+import silver.bars.domain.Direction.Buy
 import silver.bars.domain.Order
 import silver.bars.domain.OrderId
-import silver.bars.domain.OrderSummary
+import silver.bars.domain.Summary
+import silver.bars.domain.Summary.OrderSummary
 
 class OrderBoard(private val orderIds: IdGenerator<OrderId>) {
     private val orders = mutableListOf<Order>()
@@ -20,12 +22,17 @@ class OrderBoard(private val orderIds: IdGenerator<OrderId>) {
             true -> null
         }
 
-    fun summary(): List<OrderSummary> {
-        val summaries = orders.map { OrderSummary(it.quantity, it.price, it.direction) }
-        return summaries.groupingBy { it.price }
+    fun summary(): Summary {
+        val (buyOrders, sellOrders) = orders.partition { it.direction == Buy }
+        return Summary(combine(buyOrders), combine(sellOrders))
+    }
+
+    private fun combine(orders: List<Order>): List<OrderSummary> =
+        orders
+            .map { OrderSummary(it.quantity, it.price) }
+            .groupingBy { it.price }
             .reduce { _, acc, summary -> acc.copy(quantity = acc.quantity + summary.quantity) }.values
             .toList()
-    }
 }
 
 interface IdGenerator<T> {

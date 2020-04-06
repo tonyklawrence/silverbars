@@ -5,27 +5,31 @@ import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.hasElement
 import com.natpryce.hamkrest.isEmpty
 import org.junit.jupiter.api.Test
+import silver.bars.domain.Direction.Buy
 import silver.bars.domain.Direction.Sell
 import silver.bars.domain.OrderId
-import silver.bars.domain.OrderSummary
+import silver.bars.domain.Summary.OrderSummary
 
 class OrdersTest {
     private val orders = OrderBoard(SomeOrderIds("foo", "bar", "baz", "qux"))
 
     @Test fun `a new order board has no orders`() {
-        assertThat(orders.summary(), isEmpty)
+        val (buyOrders, sellOrders) = orders.summary()
+        assertThat(buyOrders, isEmpty)
+        assertThat(sellOrders, isEmpty)
     }
 
     @Test fun `can register an order and generate an id`() {
         val orderId = orders.register("user1", 3.5, 306, Sell)
         assertThat(orderId, equalTo(OrderId("foo")))
-        assertThat(orders.summary(), hasElement(OrderSummary(3.5, 306, Sell)))
+        assertThat(orders.summary().sellOrders, hasElement(OrderSummary(3.5, 306)))
+        assertThat(orders.summary().buyOrders, isEmpty)
     }
 
     @Test fun `can cancel an existing order`() {
         val orderId = orders.register("user1", 3.5, 306, Sell)
         orders.cancel(orderId)
-        assertThat(orders.summary(), isEmpty)
+        assertThat(orders.summary().sellOrders, isEmpty)
     }
 
     @Test fun `attempting to cancel a non-existing order should result in an error`() {
@@ -35,7 +39,16 @@ class OrdersTest {
     @Test fun `orders of the same value should be merged in the summary`() {
         orders.register("user1", 3.5, 306, Sell)
         orders.register("user2", 2.5, 306, Sell)
-        assertThat(orders.summary(), equalTo(listOf(OrderSummary(6.0, 306, Sell))))
+        assertThat(orders.summary().sellOrders, equalTo(listOf(OrderSummary(6.0, 306))))
+    }
+
+    @Test fun `buy and sell orders are not considered the same`() {
+        orders.register("user1", 3.5, 306, Buy)
+        orders.register("user2", 2.5, 306, Sell)
+
+        val (buyOrders, sellOrders) = orders.summary()
+        assertThat(buyOrders, equalTo(listOf(OrderSummary(3.5, 306))))
+        assertThat(sellOrders, equalTo(listOf(OrderSummary(2.5, 306))))
     }
 }
 
