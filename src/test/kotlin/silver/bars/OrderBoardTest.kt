@@ -9,8 +9,9 @@ import silver.bars.domain.Direction.Buy
 import silver.bars.domain.Direction.Sell
 import silver.bars.domain.OrderId
 import silver.bars.domain.Summary.OrderSummary
+import silver.bars.util.SomeOrderIds
 
-class OrdersTest {
+class OrderBoardTest {
     private val orders = OrderBoard(SomeOrderIds("foo", "bar", "baz", "qux"))
 
     @Test fun `a new order board has no orders`() {
@@ -74,9 +75,4 @@ class OrdersTest {
             OrderSummary(3.0, 100)
         )))
     }
-}
-
-class SomeOrderIds(vararg ids: String): IdGenerator<OrderId> {
-    private val orderIds = ids.map { OrderId(it) }.iterator()
-    override fun newId(): OrderId = orderIds.next()
 }
