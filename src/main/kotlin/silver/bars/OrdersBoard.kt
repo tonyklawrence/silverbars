@@ -13,6 +13,10 @@ class OrdersBoard(private val orderIds: IdGenerator<OrderId>) {
         return orderId
     }
 
+    fun cancel(orderId: OrderId) {
+        orders.removeIf { it.id == orderId }
+    }
+
     fun summary(): List<Order> {
         return orders
     }

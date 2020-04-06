@@ -21,6 +21,12 @@ class OrdersTest {
         assertThat(orderId, equalTo(OrderId("foo")))
         assertThat(orders.summary(), hasElement(Order(orderId, "user1", 3.5, 306, Sell)))
     }
+
+    @Test fun `can cancel an existing order`() {
+        val orderId = orders.register("user1", 3.5, 306, Sell)
+        orders.cancel(orderId)
+        assertThat(orders.summary(), isEmpty)
+    }
 }
 
 class SomeOrderIds(vararg ids: String): IdGenerator<OrderId> {
