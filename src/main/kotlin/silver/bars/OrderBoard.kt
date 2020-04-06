@@ -4,7 +4,7 @@ import silver.bars.domain.Direction
 import silver.bars.domain.Order
 import silver.bars.domain.OrderId
 
-class OrdersBoard(private val orderIds: IdGenerator<OrderId>) {
+class OrderBoard(private val orderIds: IdGenerator<OrderId>) {
     private val orders = mutableListOf<Order>()
 
     fun register(userId: String, quantity: Double, price: Int, direction: Direction): OrderId {
@@ -13,13 +13,13 @@ class OrdersBoard(private val orderIds: IdGenerator<OrderId>) {
         return orderId
     }
 
-    fun cancel(orderId: OrderId) {
-        orders.removeIf { it.id == orderId }
-    }
+    fun cancel(orderId: OrderId): OrderNotFound? =
+        when (orders.removeIf { it.id == orderId }) {
+            false -> OrderNotFound(orderId)
+            true -> null
+        }
 
-    fun summary(): List<Order> {
-        return orders
-    }
+    fun summary(): List<Order> = orders
 }
 
 interface IdGenerator<T> {

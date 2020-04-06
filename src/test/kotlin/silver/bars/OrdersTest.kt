@@ -10,7 +10,7 @@ import silver.bars.domain.Order
 import silver.bars.domain.OrderId
 
 class OrdersTest {
-    private val orders = OrdersBoard(SomeOrderIds("foo", "bar", "baz", "qux"))
+    private val orders = OrderBoard(SomeOrderIds("foo", "bar", "baz", "qux"))
 
     @Test fun `a new order board has no orders`() {
         assertThat(orders.summary(), isEmpty)
@@ -26,6 +26,10 @@ class OrdersTest {
         val orderId = orders.register("user1", 3.5, 306, Sell)
         orders.cancel(orderId)
         assertThat(orders.summary(), isEmpty)
+    }
+
+    @Test fun `attempting to cancel a non-existing order should result in an error`() {
+        assertThat(orders.cancel(OrderId("foo")), equalTo(OrderNotFound(OrderId("foo"))))
     }
 }
 
