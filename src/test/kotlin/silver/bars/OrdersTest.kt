@@ -50,6 +50,30 @@ class OrdersTest {
         assertThat(buyOrders, equalTo(listOf(OrderSummary(3.5, 306))))
         assertThat(sellOrders, equalTo(listOf(OrderSummary(2.5, 306))))
     }
+
+    @Test fun `sell orders with the lowest prices are shown first`() {
+        orders.register("user1", 7.0, 200, Sell)
+        orders.register("user2", 3.0, 100, Sell)
+        orders.register("user3", 1.0, 300, Sell)
+
+        assertThat(orders.summary().sellOrders, equalTo(listOf(
+            OrderSummary(3.0, 100),
+            OrderSummary(7.0, 200),
+            OrderSummary(1.0, 300)
+        )))
+    }
+
+    @Test fun `buy orders with the highest prices are shown first`() {
+        orders.register("user1", 7.0, 200, Buy)
+        orders.register("user2", 3.0, 100, Buy)
+        orders.register("user3", 1.0, 300, Buy)
+
+        assertThat(orders.summary().buyOrders, equalTo(listOf(
+            OrderSummary(1.0, 300),
+            OrderSummary(7.0, 200),
+            OrderSummary(3.0, 100)
+        )))
+    }
 }
 
 class SomeOrderIds(vararg ids: String): IdGenerator<OrderId> {

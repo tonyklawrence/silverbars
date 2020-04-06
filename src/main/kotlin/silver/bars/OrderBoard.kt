@@ -24,15 +24,16 @@ class OrderBoard(private val orderIds: IdGenerator<OrderId>) {
 
     fun summary(): Summary {
         val (buyOrders, sellOrders) = orders.partition { it.direction == Buy }
-        return Summary(combine(buyOrders), combine(sellOrders))
+        return Summary(
+            combine(buyOrders).sortedByDescending { it.price },
+            combine(sellOrders).sortedBy { it.price })
     }
 
     private fun combine(orders: List<Order>): List<OrderSummary> =
         orders
-            .map { OrderSummary(it.quantity, it.price) }
             .groupingBy { it.price }
             .reduce { _, acc, summary -> acc.copy(quantity = acc.quantity + summary.quantity) }.values
-            .toList()
+            .map { OrderSummary(it.quantity, it.price) }
 }
 
 interface IdGenerator<T> {
